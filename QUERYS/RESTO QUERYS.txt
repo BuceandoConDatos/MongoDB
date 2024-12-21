@@ -1,0 +1,191 @@
+2º QUERY
+
+db.proyectofinal.find()
+
+3º QUERY
+
+db.proyectofinal.countDocuments()
+
+4º QUERY
+
+db.proyectofinal.aggregate([
+  {$group: {_id: "$Make"}},
+  {$count: "Total Marcas Distintas"}
+])
+
+db.proyectofinal.aggregate([
+  {$group: {_id: "$Vehicle Class"}},
+  {$count: "Total Tipos Vehículos Distintos"}
+])
+
+db.proyectofinal.aggregate([
+  {$group: {_id: "$Cylinders"}},
+  {$count: "Total Tipos Cilindrada"}
+])
+
+db.proyectofinal.aggregate([
+  {$group: {_id: "$Fuel Type"}},
+  {$count: "Total Tipos Combustible"}
+])
+
+5º QUERY
+
+db.proyectofinal.find({
+	$or: [
+    {"Make": null},
+    {"Model": null},
+    {"Vehicle Class": null},
+    {"Engine Size(L)": null},
+    {"Cylinders": null},
+    {"Transmission": null},
+    {"Fuel Type": null},
+    {"Fuel Consumption City (L/100 km)": null},
+    {"Fuel Consumption Hwy (L/100 km)": null},
+    {"Fuel Consumption Comb (L/100 km)": null},
+    {"Fuel Consumption Comb (mpg)": null},
+    {"CO2 Emissions(g/km)": null}
+]})
+
+6º QUERY
+
+db.proyectofinal.find({"Make": "BENTLEY"})
+
+db.proyectofinal.find({"Make": "BENTLEY"}).count()
+
+
+7º QUERY
+
+db.proyectofinal.find(
+  {"Make": "FORD"},
+  {"Vehicle Class": "SUV - STANDARD"},
+  {"Engine Size(L)": 5.4}
+)
+
+db.proyectofinal.find(
+  {"Make": "FORD"},
+  {"Vehicle Class": "SUV - STANDARD"},
+  {"Engine Size(L)": 5.4}
+).count()
+
+8º QUERY
+
+db.proyectofinal.find(
+  {"Mark": {$in: ["ASTON MARTIN", "AUDI", "BMW", "BUGATTI", "LAMBORGUINI", "PORSCHE", "RAM", "ROLLS-ROYCE"]},
+	"CO2 Emissions(g/km)": {$gt: 90, $lt: 140}
+  })
+
+9º QUERY
+
+db.proyectofinal.find(
+  {"CO2 Emissions(g/km)": {$lt: 140}}
+)
+
+db.proyectofinal.find(
+  {"CO2 Emissions(g/km)": {$lt: 140}}
+).count()
+
+
+10º QUERY
+
+db.proyectofinal.find({"Cylinders": 3}, {"Fuel Type": "X"})
+db.proyectofinal.find({"Cylinders": 3}, {"Fuel Type": "X"}).count()
+
+11º QUERY
+
+db.proyectofinal.aggregate([
+  {$group: {_id: "$Make", "Make": {$sum: 1}}},
+  {$sort: {_id: 1}}
+])
+
+db.proyectofinal.aggregate([
+  {$group: {_id: "$Make", "Make": {$sum: 1}}},
+  {$sort: {_id: 1}},
+  {$count: "totalCount"}
+])
+
+12º QUERY
+
+db.proyectofinal.aggregate([
+  {$group: {_id: "$Make", count: {$sum: 1}, "Media emisiones CO2 marca": {$avg: "$CO2 Emissions(g/km)"}}},
+  {$sort: {"Media emisiones CO2 marca": -1}}
+])
+
+13º QUERY
+
+db.proyectofinal.find(
+  {Make: "ACURA", Model: "RDX AWD"},
+  {"CO2 Emissions(g/km)": 1}
+)
+
+14º QUERY
+
+Hay que cargar de nuevo el dataset porque se modifican cosas que pueden alterar el análisis, yo lo he hecho con otro nombre
+
+db.proyectofinal2.updateMany(
+  {Make: "AUDI"},
+  {$set: {"Cylinders": 1}}
+)
+
+15º QUERY
+
+db.proyectofinal2.updateMany(
+  {Make: "AUDI"},
+  {$set: {"Cylinders": 1}, $set: {"CO2 Emissions": 0}}
+)
+
+16º QUERY
+
+db.proyectofinal2.updateMany(
+  {},
+  {$set: {"CO2 Emissions(g/km)": 100}}
+)
+
+17º QUERY
+
+Volvemos a utilizar la database de "proyectofinal".
+
+db.proyectofinal.insertOne([{
+Make: "GTA",
+Model: "Spano",
+'Vehicle Class': "SUPER-DEPORTIVO",
+'Engine Size(L)': 8,
+Cylinders: 12,
+Transmission: "Automático",
+'Fuel Type': 'Z',
+'Fuel Consumption City (L/100 km)': 30,
+'Fuel Consumption Hwy (L/100 km)': 20,
+'Fuel Consumption Comb (L/100 km)': 25,
+'Fuel Consumption Comb (mpg)': 200,
+'CO2 Emissions(g/km)': 1500
+}])
+
+18º QUERY
+
+db.proyectofinal.find({"Make": "GTA"})
+
+19º QUERY
+
+db.proyectofinal.updateMany(
+  {},
+  {$set: {"¿Puede entrar a Madrid Central?": false}}
+)
+
+20º QUERY
+
+db.proyectofinal.find({Make: "AUDI"})
+
+21º QUERY
+
+db.proyectofinal.aggregate([
+  {$group: {_id: null, "Promedio Emisiones CO2 Global": {$avg: "$CO2 Emissions(g/km)"}}},
+  {$unionWith: {
+      coll: "proyectofinal",
+      pipeline: [
+        {$match: {"Make": "TOYOTA"}},
+        {$group: {_id: "$Make", "Promedio Emisiones CO2 Toyota": {$avg: "$CO2 Emissions(g/km)"}}}]}},
+  {$unionWith: {
+      coll: "proyectofinal",
+      pipeline: [
+        {$match: {"Make": "BENTLEY"}},
+        {$group: {_id: "$Make", "Promedio Emisiones CO2 Bentley": {$avg: "$CO2 Emissions(g/km)"}}}
+      ]}}])
